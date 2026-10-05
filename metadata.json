@@ -1,0 +1,7 @@
+{
+  "name": "JobMatch - Job Opportunity Recommendation System",
+  "description": "A college AI project recommendation engine matching candidate profiles with job opportunities using weighted skill matching, role affinity, and qualification scoring.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
