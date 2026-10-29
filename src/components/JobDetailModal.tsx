@@ -14,7 +14,9 @@ import {
   Bookmark,
   BookmarkCheck,
   Check,
-  Percent
+  Percent,
+  Zap,
+  ExternalLink
 } from 'lucide-react';
 import { JobWithMatch, CandidateProfile } from '../types';
 
@@ -24,6 +26,7 @@ interface JobDetailModalProps {
   onClose: () => void;
   onApply: (jobId: string) => void;
   onToggleSave: (jobId: string) => void;
+  onOpenEasyApply: (job: JobWithMatch) => void;
 }
 
 export const JobDetailModal: React.FC<JobDetailModalProps> = ({
@@ -32,6 +35,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
   onClose,
   onApply,
   onToggleSave,
+  onOpenEasyApply,
 }) => {
   if (!job) return null;
 
@@ -301,30 +305,40 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            <a
+              href={job.applyUrl || `https://careers.${job.company.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden sm:flex items-center gap-1 px-3 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 border border-slate-300 rounded-md hover:bg-slate-100 transition-colors"
+            >
+              <span>Company Career Portal</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+
             <button
               onClick={onClose}
               className="px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-200 rounded-md transition-colors"
             >
               Close
             </button>
-            <button
-              onClick={() => onApply(job.id)}
-              disabled={job.applied}
-              className={`px-5 py-2 text-xs font-bold rounded-md shadow-xs transition-colors flex items-center gap-1.5 ${
-                job.applied
-                  ? 'bg-emerald-600 text-white cursor-default'
-                  : 'bg-[#2563EB] hover:bg-blue-700 text-white'
-              }`}
-            >
-              {job.applied ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  <span>Application Submitted</span>
-                </>
-              ) : (
-                <span>Submit Job Application</span>
-              )}
-            </button>
+
+            {job.applied ? (
+              <span className="px-5 py-2 text-xs font-bold rounded-md bg-emerald-600 text-white flex items-center gap-1.5 cursor-default shadow-xs">
+                <Check className="w-4 h-4" />
+                <span>Application Submitted ✓</span>
+              </span>
+            ) : (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenEasyApply(job);
+                }}
+                className="px-5 py-2 text-xs font-bold rounded-md shadow-xs bg-[#2563EB] hover:bg-blue-700 text-white flex items-center gap-1.5 transition-colors"
+              >
+                <Zap className="w-4 h-4 fill-current" />
+                <span>Easy Apply (1-Click)</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

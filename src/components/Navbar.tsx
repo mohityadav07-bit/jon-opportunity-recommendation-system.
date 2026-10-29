@@ -1,5 +1,5 @@
 import React from 'react';
-import { Briefcase, UserCheck, Sparkles, Plus, BookOpen, Layers } from 'lucide-react';
+import { Briefcase, UserCheck, Sparkles, Plus, BookOpen, Layers, UploadCloud } from 'lucide-react';
 import { CandidateProfile } from '../types';
 
 interface NavbarProps {
@@ -10,6 +10,7 @@ interface NavbarProps {
   setActiveTab: (tab: 'recommendations' | 'profile' | 'allJobs' | 'vivaDemo') => void;
   onOpenAddJob: () => void;
   onOpenCreateCandidate: () => void;
+  onOpenResumeUpload: () => void;
   recommendedCount: number;
 }
 
@@ -21,6 +22,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveTab,
   onOpenAddJob,
   onOpenCreateCandidate,
+  onOpenResumeUpload,
   recommendedCount,
 }) => {
   return (
@@ -132,6 +134,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               </select>
             </div>
 
+            {/* Upload Resume Button */}
+            <button
+              onClick={onOpenResumeUpload}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-emerald-700 hover:bg-emerald-600 text-white rounded-md shadow-xs transition-colors whitespace-nowrap"
+              title="Upload resume in PDF, DOC, DOCX, or TXT format to get instant job recommendations"
+            >
+              <UploadCloud className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Upload Resume</span>
+            </button>
+
             {/* Quick Add Candidate Button */}
             <button
               onClick={onOpenCreateCandidate}
@@ -139,7 +151,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               title="Create a new candidate profile"
             >
               <Plus className="w-3.5 h-3.5 text-blue-400" />
-              <span className="hidden sm:inline">Candidate</span>
+              <span className="hidden md:inline">Profile</span>
             </button>
 
             {/* Add Job Button */}

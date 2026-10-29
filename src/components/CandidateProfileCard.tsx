@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, GraduationCap, Clock, Target, MapPin, X, Plus, Edit3, CheckCircle2, RotateCcw } from 'lucide-react';
+import { User, GraduationCap, Clock, Target, MapPin, X, Plus, Edit3, CheckCircle2, RotateCcw, UploadCloud, FileText } from 'lucide-react';
 import { CandidateProfile } from '../types';
 
 interface CandidateProfileCardProps {
@@ -8,6 +8,7 @@ interface CandidateProfileCardProps {
   onResetCandidate: () => void;
   onCreateCandidate: () => void;
   onViewAllCandidates: () => void;
+  onOpenResumeUpload: () => void;
 }
 
 export const CandidateProfileCard: React.FC<CandidateProfileCardProps> = ({
@@ -16,6 +17,7 @@ export const CandidateProfileCard: React.FC<CandidateProfileCardProps> = ({
   onResetCandidate,
   onCreateCandidate,
   onViewAllCandidates,
+  onOpenResumeUpload,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newSkillInput, setNewSkillInput] = useState('');
@@ -82,30 +84,38 @@ export const CandidateProfileCard: React.FC<CandidateProfileCardProps> = ({
             · Changes immediately recalculate matching ranks
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={onOpenResumeUpload}
+            className="flex items-center gap-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-md shadow-xs transition-colors"
+            title="Upload resume (PDF, DOC, DOCX, TXT) to automatically extract skills & get matched jobs"
+          >
+            <UploadCloud className="w-3.5 h-3.5" />
+            <span>Upload Resume</span>
+          </button>
           <button
             onClick={onCreateCandidate}
-            className="flex items-center gap-1 text-xs font-semibold text-white bg-[#2563EB] hover:bg-blue-700 px-2.5 py-1 rounded-md shadow-xs transition-colors"
+            className="flex items-center gap-1 text-xs font-semibold text-white bg-[#2563EB] hover:bg-blue-700 px-2.5 py-1.5 rounded-md shadow-xs transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>New Candidate</span>
           </button>
           <button
             onClick={onViewAllCandidates}
-            className="flex items-center gap-1 text-xs font-medium text-slate-700 hover:text-[#2563EB] bg-white border border-slate-200 px-2.5 py-1 rounded-md transition-colors"
+            className="flex items-center gap-1 text-xs font-medium text-slate-700 hover:text-[#2563EB] bg-white border border-slate-200 px-2.5 py-1.5 rounded-md transition-colors"
           >
             <span>All Profiles</span>
           </button>
           <button
             onClick={() => setIsEditing(!isEditing)}
-            className="flex items-center gap-1 text-xs font-medium text-[#2563EB] hover:text-blue-800 bg-white border border-blue-200 px-3 py-1 rounded-md transition-colors"
+            className="flex items-center gap-1 text-xs font-medium text-[#2563EB] hover:text-blue-800 bg-white border border-blue-200 px-3 py-1.5 rounded-md transition-colors"
           >
             <Edit3 className="w-3.5 h-3.5" />
-            <span>{isEditing ? 'Close Editor' : 'Edit Profile'}</span>
+            <span>{isEditing ? 'Close' : 'Edit Profile'}</span>
           </button>
           <button
             onClick={onResetCandidate}
-            className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-md transition-colors"
+            className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-700 bg-white border border-slate-200 px-2.5 py-1.5 rounded-md transition-colors"
             title="Reset to default college profile"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -113,6 +123,25 @@ export const CandidateProfileCard: React.FC<CandidateProfileCardProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Active Resume Attachment Banner (if present) */}
+      {candidate.resumeFileName && (
+        <div className="bg-emerald-50/70 border-b border-emerald-100 px-6 py-2 flex flex-wrap items-center justify-between text-xs text-emerald-900 gap-2">
+          <div className="flex items-center gap-2">
+            <FileText className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>
+              <strong>Active Resume:</strong> {candidate.resumeFileName} ({candidate.resumeFileSize || 'Ready'})
+              {candidate.resumeUploadedAt && ` · Uploaded at ${candidate.resumeUploadedAt}`}
+            </span>
+          </div>
+          <button
+            onClick={onOpenResumeUpload}
+            className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 underline"
+          >
+            Update Resume (PDF / DOC / DOCX)
+          </button>
+        </div>
+      )}
 
       <div className="p-6">
         {!isEditing ? (

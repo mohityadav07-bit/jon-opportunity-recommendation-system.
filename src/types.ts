@@ -13,6 +13,9 @@ export interface CandidateProfile {
   preferredLocation?: string;
   bio?: string;
   avatarUrl?: string;
+  resumeFileName?: string;
+  resumeUploadedAt?: string;
+  resumeFileSize?: string;
 }
 
 export interface Job {
@@ -37,6 +40,8 @@ export interface Job {
   department: string;
   applied?: boolean;
   saved?: boolean;
+  applyUrl?: string;
+  portalName?: string;
 }
 
 export interface MatchScoreBreakdown {
@@ -53,6 +58,9 @@ export interface MatchScoreBreakdown {
 
 export interface JobWithMatch extends Job {
   match: MatchScoreBreakdown;
+  appliedAt?: string;
+  applicationId?: string;
+  applicantNote?: string;
 }
 
 export interface AlgorithmWeights {

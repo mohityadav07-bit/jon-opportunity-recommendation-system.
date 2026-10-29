@@ -16,7 +16,8 @@ import {
   AlertTriangle,
   RotateCcw,
   Sparkles,
-  Check
+  Check,
+  UploadCloud
 } from 'lucide-react';
 import { CandidateProfile, JobWithMatch } from '../types';
 
@@ -29,6 +30,7 @@ interface CandidateProfileFullViewProps {
   onEditCandidate: (candidate: CandidateProfile) => void;
   onDeleteCandidate: (candidateId: string) => void;
   onRestoreSampleCandidates: () => void;
+  onOpenResumeUpload: () => void;
   savedJobs: JobWithMatch[];
   appliedJobs: JobWithMatch[];
   onSelectJob: (job: JobWithMatch) => void;
@@ -43,6 +45,7 @@ export const CandidateProfileFullView: React.FC<CandidateProfileFullViewProps> =
   onEditCandidate,
   onDeleteCandidate,
   onRestoreSampleCandidates,
+  onOpenResumeUpload,
   savedJobs,
   appliedJobs,
   onSelectJob,
@@ -79,7 +82,16 @@ export const CandidateProfileFullView: React.FC<CandidateProfileFullViewProps> =
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={onOpenResumeUpload}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-xs transition-colors"
+              title="Upload resume (PDF, DOC, DOCX, TXT) to create or update profile"
+            >
+              <UploadCloud className="w-4 h-4" />
+              <span>Upload Resume</span>
+            </button>
+
             <button
               onClick={onRestoreSampleCandidates}
               className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-600 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors"
@@ -511,18 +523,28 @@ export const CandidateProfileFullView: React.FC<CandidateProfileFullViewProps> =
               {appliedJobs.map((job) => (
                 <div
                   key={job.id}
-                  className="p-4 rounded-lg border border-emerald-200 bg-emerald-50/30 flex items-center justify-between gap-4"
+                  className="p-4 rounded-lg border border-emerald-200 bg-emerald-50/30 flex flex-wrap items-center justify-between gap-4"
                 >
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="text-sm font-bold text-[#0F172A]">{job.title}</h4>
-                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
-                        Submitted ✓
+                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">
+                        Easy Applied ✓
                       </span>
+                      {job.applicationId && (
+                        <span className="text-[10px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
+                          {job.applicationId}
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-slate-600 mt-0.5">
                       {job.company} · {job.location} · {job.salary}
                     </p>
+                    {job.appliedAt && (
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        Applied at: {job.appliedAt}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-extrabold text-[#16A34A] tabular-nums">
@@ -530,7 +552,7 @@ export const CandidateProfileFullView: React.FC<CandidateProfileFullViewProps> =
                     </span>
                     <button
                       onClick={() => onSelectJob(job)}
-                      className="text-xs font-medium text-slate-700 border border-slate-300 px-3 py-1.5 rounded-md hover:bg-white"
+                      className="text-xs font-semibold text-slate-700 border border-slate-300 px-3 py-1.5 rounded-md hover:bg-white transition-colors"
                     >
                       View Details
                     </button>

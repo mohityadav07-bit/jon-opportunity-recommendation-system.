@@ -6,13 +6,15 @@ import { FilterBar } from './components/FilterBar';
 import { JobCard } from './components/JobCard';
 import { JobDetailModal } from './components/JobDetailModal';
 import { AddJobModal } from './components/AddJobModal';
+import { ResumeUploadModal } from './components/ResumeUploadModal';
+import { EasyApplyModal } from './components/EasyApplyModal';
 import { VivaDemoView } from './components/VivaDemoView';
 import { CandidateProfileFullView } from './components/CandidateProfileFullView';
 import { AllJobsView } from './components/AllJobsView';
 import { SAMPLE_CANDIDATES, INITIAL_JOBS } from './data/mockData';
 import { CandidateProfile, Job, JobWithMatch, AlgorithmWeights } from './types';
 import { computeJobMatch, DEFAULT_WEIGHTS } from './utils/recommendationEngine';
-import { Sparkles, CheckCircle2, Bookmark, Info, GraduationCap, AlertCircle, RefreshCw } from 'lucide-react';
+import { Sparkles, CheckCircle2, Bookmark, Info, GraduationCap, AlertCircle, RefreshCw, UploadCloud, Zap } from 'lucide-react';
 
 export default function App() {
   // Candidate Profile State
@@ -33,6 +35,8 @@ export default function App() {
   const [isAddJobOpen, setIsAddJobOpen] = useState(false);
   const [isCandidateModalOpen, setIsCandidateModalOpen] = useState(false);
   const [candidateToEdit, setCandidateToEdit] = useState<CandidateProfile | null>(null);
+  const [isResumeUploadOpen, setIsResumeUploadOpen] = useState(false);
+  const [easyApplyJob, setEasyApplyJob] = useState<JobWithMatch | null>(null);
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -250,21 +254,93 @@ export default function App() {
     }
   };
 
-  // Handler: Apply for Job
-  const handleApply = (jobId: string) => {
+  // Handler: Open Resume Upload Modal
+  const handleOpenResumeUpload = () => {
+    setIsResumeUploadOpen(true);
+  };
+
+  // Handler: Apply Parsed Candidate from Resume Upload
+  const handleApplyParsedCandidate = (
+    parsedCandidate: CandidateProfile,
+    actionType: 'updateCurrent' | 'createNew'
+  ) => {
+    if (actionType === 'createNew') {
+      setCandidates((prev) => [parsedCandidate, ...prev]);
+      setSelectedCandidateId(parsedCandidate.id);
+      setActiveTab('recommendations');
+      showToast(
+        `Resume parsed for ${parsedCandidate.name}! AI calculated recommendations.`
+      );
+    } else {
+      // Merge into current active candidate
+      const updated: CandidateProfile = {
+        ...currentCandidate,
+        name: parsedCandidate.name,
+        qualification: parsedCandidate.qualification,
+        highestQualification: parsedCandidate.highestQualification,
+        experienceYears: parsedCandidate.experienceYears,
+        experienceLevel: parsedCandidate.experienceLevel,
+        preferredRole: parsedCandidate.preferredRole,
+        preferredLocation: parsedCandidate.preferredLocation,
+        skills: parsedCandidate.skills,
+        bio: parsedCandidate.bio,
+        resumeFileName: parsedCandidate.resumeFileName,
+        resumeFileSize: parsedCandidate.resumeFileSize,
+        resumeUploadedAt: parsedCandidate.resumeUploadedAt,
+      };
+      setCandidates((prev) =>
+        prev.map((c) => (c.id === currentCandidate.id ? updated : c))
+      );
+      setActiveTab('recommendations');
+      showToast(
+        `Resume applied to ${currentCandidate.name}! Rankings refreshed.`
+      );
+    }
+  };
+
+  // Handler: Easy Apply Submission
+  const handleEasyApplySubmit = (
+    jobId: string,
+    applicantData: { note: string; resumeFile: string }
+  ) => {
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const appId = `APP-${Math.floor(10000 + Math.random() * 90000)}`;
+
     setJobs((prev) =>
-      prev.map((j) => (j.id === jobId ? { ...j, applied: true } : j))
+      prev.map((j) =>
+        j.id === jobId
+          ? {
+              ...j,
+              applied: true,
+              appliedAt: timestamp,
+              applicationId: appId,
+              applicantNote: applicantData.note,
+            }
+          : j
+      )
     );
+
     const targetJob = jobs.find((j) => j.id === jobId);
     if (targetJob) {
-      showToast(`Application submitted successfully for ${targetJob.title}!`);
+      showToast(`Easy Application submitted for ${targetJob.title} (${appId})!`);
     }
-    // Update active modal instance if opened
+
     if (selectedJobForModal && selectedJobForModal.id === jobId) {
       setSelectedJobForModal({
         ...selectedJobForModal,
         applied: true,
+        appliedAt: timestamp,
+        applicationId: appId,
       });
+    }
+  };
+
+  // Handler: Apply for Job
+  const handleApply = (jobId: string) => {
+    const targetJob = jobs.find((j) => j.id === jobId);
+    if (targetJob) {
+      const matchObj = jobsWithMatches.find((j) => j.id === jobId) || (targetJob as JobWithMatch);
+      setEasyApplyJob(matchObj);
     }
   };
 
@@ -310,6 +386,7 @@ export default function App() {
         setActiveTab={setActiveTab}
         onOpenAddJob={() => setIsAddJobOpen(true)}
         onOpenCreateCandidate={handleOpenCreateCandidate}
+        onOpenResumeUpload={handleOpenResumeUpload}
         recommendedCount={jobs.length}
       />
 
@@ -325,6 +402,7 @@ export default function App() {
               onResetCandidate={handleResetCandidate}
               onCreateCandidate={handleOpenCreateCandidate}
               onViewAllCandidates={() => setActiveTab('profile')}
+              onOpenResumeUpload={handleOpenResumeUpload}
             />
 
             {/* Project Notice Banner for Viva Presentation */}
@@ -395,14 +473,15 @@ export default function App() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {filteredAndSortedJobs.map((job, index) => (
-                  <JobCard
-                    key={job.id}
-                    job={job}
-                    rank={index + 1}
-                    onSelectJob={(j) => setSelectedJobForModal(j)}
-                    onToggleSave={handleToggleSave}
-                    onApply={handleApply}
-                  />
+                   <JobCard
+                     key={job.id}
+                     job={job}
+                     rank={index + 1}
+                     onSelectJob={(j) => setSelectedJobForModal(j)}
+                     onToggleSave={handleToggleSave}
+                     onApply={handleApply}
+                     onEasyApply={(j) => setEasyApplyJob(j)}
+                   />
                 ))}
               </div>
             )}
@@ -423,6 +502,7 @@ export default function App() {
             onEditCandidate={handleOpenEditCandidate}
             onDeleteCandidate={handleDeleteCandidate}
             onRestoreSampleCandidates={handleRestoreSampleCandidates}
+            onOpenResumeUpload={handleOpenResumeUpload}
             savedJobs={savedJobs}
             appliedJobs={appliedJobs}
             onSelectJob={(j) => setSelectedJobForModal(j)}
@@ -435,6 +515,7 @@ export default function App() {
             jobs={jobsWithMatches}
             onSelectJob={(j) => setSelectedJobForModal(j)}
             onOpenAddJob={() => setIsAddJobOpen(true)}
+            onOpenEasyApply={(j) => setEasyApplyJob(j)}
           />
         )}
 
@@ -476,6 +557,7 @@ export default function App() {
           onClose={() => setSelectedJobForModal(null)}
           onApply={handleApply}
           onToggleSave={handleToggleSave}
+          onOpenEasyApply={(j) => setEasyApplyJob(j)}
         />
       )}
 
@@ -495,6 +577,24 @@ export default function App() {
         }}
         onSave={handleSaveCandidateModal}
         candidateToEdit={candidateToEdit}
+      />
+
+      {/* Resume Upload Modal (PDF, DOC, DOCX, TXT) */}
+      <ResumeUploadModal
+        isOpen={isResumeUploadOpen}
+        onClose={() => setIsResumeUploadOpen(false)}
+        onApplyParsedCandidate={handleApplyParsedCandidate}
+        currentCandidateName={currentCandidate.name}
+      />
+
+      {/* Easy Apply Modal */}
+      <EasyApplyModal
+        isOpen={!!easyApplyJob}
+        job={easyApplyJob}
+        candidate={currentCandidate}
+        onClose={() => setEasyApplyJob(null)}
+        onSubmitApplication={handleEasyApplySubmit}
+        onOpenResumeUpload={handleOpenResumeUpload}
       />
     </div>
   );

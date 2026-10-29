@@ -7,7 +7,8 @@ import {
   GraduationCap,
   MapPin,
   Clock,
-  Plus
+  Plus,
+  Zap
 } from 'lucide-react';
 import { JobWithMatch } from '../types';
 
@@ -15,12 +16,14 @@ interface AllJobsViewProps {
   jobs: JobWithMatch[];
   onSelectJob: (job: JobWithMatch) => void;
   onOpenAddJob: () => void;
+  onOpenEasyApply: (job: JobWithMatch) => void;
 }
 
 export const AllJobsView: React.FC<AllJobsViewProps> = ({
   jobs,
   onSelectJob,
   onOpenAddJob,
+  onOpenEasyApply,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDept, setFilterDept] = useState('ALL');
@@ -160,16 +163,34 @@ export const AllJobsView: React.FC<AllJobsViewProps> = ({
                     </div>
                   </td>
                   <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectJob(job);
-                      }}
-                      className="px-2.5 py-1 text-xs font-semibold text-white bg-[#2563EB] hover:bg-blue-700 rounded transition-colors inline-flex items-center gap-1"
-                    >
-                      <span>Inspect</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
+                    <div className="flex items-center justify-end gap-1.5">
+                      {job.applied ? (
+                        <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded">
+                          Applied ✓
+                        </span>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenEasyApply(job);
+                          }}
+                          className="px-2.5 py-1 text-xs font-bold text-white bg-[#2563EB] hover:bg-blue-700 rounded transition-colors inline-flex items-center gap-1 shadow-2xs"
+                        >
+                          <Zap className="w-3 h-3 fill-current" />
+                          <span>Easy Apply</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectJob(job);
+                        }}
+                        className="px-2.5 py-1 text-xs font-semibold text-slate-700 hover:text-slate-900 border border-slate-300 hover:bg-slate-100 rounded transition-colors inline-flex items-center gap-1"
+                      >
+                        <span>Details</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

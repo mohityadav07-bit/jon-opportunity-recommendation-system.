@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Briefcase, GraduationCap, Clock, Check, ArrowRight, Bookmark, BookmarkCheck, CheckCircle } from 'lucide-react';
+import { MapPin, Briefcase, GraduationCap, Clock, Check, ArrowRight, Bookmark, BookmarkCheck, CheckCircle, Zap, ExternalLink } from 'lucide-react';
 import { JobWithMatch } from '../types';
 
 interface JobCardProps {
@@ -8,6 +8,7 @@ interface JobCardProps {
   onSelectJob: (job: JobWithMatch) => void;
   onToggleSave: (jobId: string) => void;
   onApply: (jobId: string) => void;
+  onEasyApply: (job: JobWithMatch) => void;
 }
 
 export const JobCard: React.FC<JobCardProps> = ({
@@ -16,6 +17,7 @@ export const JobCard: React.FC<JobCardProps> = ({
   onSelectJob,
   onToggleSave,
   onApply,
+  onEasyApply,
 }) => {
   const match = job.match;
   const isHighMatch = match.overallScore >= 75;
@@ -123,8 +125,8 @@ export const JobCard: React.FC<JobCardProps> = ({
       </div>
 
       {/* Card Actions Footer */}
-      <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
-        <div className="flex items-center gap-2">
+      <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 mt-auto">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => onToggleSave(job.id)}
             className={`p-1.5 rounded-md border text-xs transition-colors ${
@@ -142,25 +144,37 @@ export const JobCard: React.FC<JobCardProps> = ({
           </button>
 
           {job.applied ? (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">
-              <CheckCircle className="w-3.5 h-3.5" />
-              <span>Applied</span>
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1.5 rounded-md border border-emerald-300">
+              <CheckCircle className="w-3.5 h-3.5 text-[#16A34A]" />
+              <span>Applied ✓</span>
             </span>
           ) : (
             <button
-              onClick={() => onApply(job.id)}
-              className="text-xs font-medium text-slate-700 hover:text-[#2563EB] hover:bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-md transition-colors"
+              onClick={() => onEasyApply(job)}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-[#2563EB] hover:bg-blue-700 rounded-md shadow-xs transition-colors whitespace-nowrap"
+              title="Quick 1-click application with your uploaded resume"
             >
-              Quick Apply
+              <Zap className="w-3.5 h-3.5 fill-current" />
+              <span>Easy Apply</span>
             </button>
           )}
+
+          <a
+            href={job.applyUrl || `https://careers.${job.company.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`}
+            target="_blank"
+            rel="noreferrer"
+            className="p-1.5 text-slate-400 hover:text-slate-600 border border-slate-200 rounded-md hover:bg-slate-50 transition-colors"
+            title={`Direct link to ${job.company} Career Portal`}
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
         </div>
 
         <button
           onClick={() => onSelectJob(job)}
-          className="flex items-center gap-1 text-xs font-semibold text-white bg-[#2563EB] hover:bg-blue-700 px-3.5 py-1.5 rounded-md shadow-xs transition-colors"
+          className="flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-[#2563EB] bg-slate-50 hover:bg-blue-50/60 border border-slate-200 px-3 py-1.5 rounded-md transition-colors"
         >
-          <span>Match Rationale</span>
+          <span>Rationale</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
